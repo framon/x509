@@ -6,7 +6,7 @@
 import fs from 'fs'
 import { strictEqual, deepEqual, ok } from 'assert'
 import { suite, it } from 'tman'
-import { PEM } from '@fidm/asn1'
+import { ASN1, PEM } from '@fidm/asn1'
 import { Certificate, RSAPublicKey, PrivateKey } from '../src/index'
 
 suite('X509', function () {
@@ -154,4 +154,19 @@ suite('X509', function () {
   //   }
   //   console.log(certs.length)
   // })
+
+  it('should parse subjectAltName otherName', function () {
+    const cert = Certificate.fromPEM(fs.readFileSync('./test/cert/othername.crt'))
+
+    ok(cert.extensions.length === 1)
+    ok(cert.extensions[0].oid === '2.5.29.17')
+    ok(cert.extensions[0].altNames)
+
+    const on = (cert.extensions[0].altNames!.find((e) => e.tag === 0))
+    strictEqual(on.typeId, '2.16.76.1.3.1')
+
+    const value = ASN1.fromDER(on.any)
+    strictEqual(value.value.toString(), '010119801234567857700000000000000001234567890SSPBA')
+  })
+
 })

@@ -700,6 +700,14 @@ function decodeExtAltName (e: Extension) {
     e.altNames.push(item)
 
     switch (gn.tag) {
+    // OtherNames
+    case 0:
+      const on = gn.mustCompound()
+      // type-id OBJECT IDENTIFIER
+      item.typeId = ASN1.parseOID(on[0].bytes)
+      // value [0] EXPLICIT ANY DEFINED BY type-id
+      item.any = on[1].bytes
+      break;
     // rfc822Name, emailAddresses
     case 1:
       item.email = gn.bytes.toString()
